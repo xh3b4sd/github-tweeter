@@ -2,13 +2,22 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/google/go-github/github"
+	"github.com/the-anna-project/random"
+	"golang.org/x/oauth2"
 )
 
 func main() {
@@ -19,6 +28,138 @@ func main() {
 }
 
 func mainE(ctx context.Context) error {
+	var err error
+
+	var newClient *github.Client
+	{
+		c := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: os.Getenv("GITHUB_TWEETER_GITHUB_TOKEN")},
+		))
+
+		newClient = github.NewClient(c)
+	}
+
+	// Fetch the latest commit made in the configured folder. The sha is used to
+	// get its associated file which changed with the commit. The name of this
+	// file then by convention indicates the highest number of files in the
+	// sequence of existing file names. The example file names below describe the
+	// convention of numbers defining the file sequence. The method below fetches
+	// the sha that assumedly added file055 which tells us that there are 55 files
+	// to chose from randomly.
+	//
+	//     path/file001
+	//     path/file002
+	//     ...
+	//     path/file054
+	//     path/file055
+	//
+	var sha string
+	{
+		in := &github.CommitsListOptions{
+			Path: "philosophy",
+			ListOptions: github.ListOptions{
+				PerPage: 1,
+			},
+		}
+
+		out, _, err := newClient.Repositories.ListCommits(ctx, "xh3b4sd", "content", in)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		sha = out[0].GetSHA()
+	}
+
+	// We fetch the file name using the commit hash found above. The commit is
+	// expected to have changed exactly one file.
+	//
+	//     path/file055
+	//
+	var file string
+	{
+		out, _, err := newClient.Repositories.GetCommit(ctx, "xh3b4sd", "content", sha)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		file = out.Files[0].GetFilename()
+	}
+
+	// We lookup the number of files in the traversed folder. The name of the
+	// changed file is expected to comply with a format as such that the end of
+	// the file name is a number of a sequence of files. When we extract the
+	// number of the example file name above it should result in the following.
+	//
+	//     55
+	//
+	var number int
+	{
+		m := regexp.MustCompile(`([0-9]+)$`).FindString(file)
+
+		number, err = strconv.Atoi(m)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	var newRandom random.Service
+	{
+		c := random.ServiceConfig{
+			BackoffFactory: func() random.Backoff {
+				return backoff.NewMaxRetries(3, time.Second)
+			},
+			RandFactory: rand.Int,
+
+			RandReader: rand.Reader,
+			Timeout:    1 * time.Second,
+		}
+
+		newRandom, err = random.NewService(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	var path string
+	{
+		i, err := newRandom.CreateMax(number + 1)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		n := strconv.Itoa(i)
+		p := len(file) - len(regexp.MustCompile(`([0-9]+)$`).ReplaceAllString(file, "")) - len(n)
+
+		path += "philosophy/"
+		for i := 0; i < p; i++ {
+			path += "0"
+		}
+		path += n
+	}
+
+	var content string
+	{
+		in := &github.RepositoryContentGetOptions{}
+
+		out, _, _, err := newClient.Repositories.GetContents(ctx, "xh3b4sd", "content", path, in)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		c, err := out.GetContent()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		content = strings.TrimSpace(regexp.MustCompile(`[\n\r\t]`).ReplaceAllString(c, " "))
+	}
+
+	fmt.Printf("%#v\n", path)
+	fmt.Printf("%#v\n", content)
+
+	return nil
+}
+
+func mainEE(ctx context.Context) error {
 	var err error
 
 	var newLogger micrologger.Logger
