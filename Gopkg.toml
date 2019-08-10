@@ -1,0 +1,21 @@
+[[constraint]]
+  branch = "master"
+  name = "github.com/dghubble/go-twitter"
+
+[[constraint]]
+  name = "github.com/dghubble/oauth1"
+  version = "0.6.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microerror"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/micrologger"
+
+
+
+[prune]
+  go-tests = true
+  unused-packages = true
