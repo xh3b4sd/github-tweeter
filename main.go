@@ -20,6 +20,40 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	org  = "xh3b4sd"
+	repo = "content"
+	dir  = "philosophy"
+)
+
+var (
+	githubToken = os.Getenv("GITHUB_TWEETER_GITHUB_TOKEN")
+
+	twitterConsumerKey    = os.Getenv("TWITTER_CONSUMER_KEY")
+	twitterConsumerSecret = os.Getenv("TWITTER_CONSUMER_SECRET")
+	twitterAccessToken    = os.Getenv("TWITTER_ACCESS_TOKEN")
+	twitterAccessSecret   = os.Getenv("TWITTER_ACCESS_SECRET")
+)
+
+var (
+	// seqExp is the regular expression for the conventional sequence number
+	// encoded in the content file names. File names must follow a pattern like
+	// shown below.
+	//
+	//     philosophy/0000001
+	//     philosophy/0000002
+	//     ...
+	//     philosophy/0000054
+	//     philosophy/0000055
+	//
+	seqExp = regexp.MustCompile(`([0-9]+)$`)
+	// wspExp is the regular expression used to trim space and line control
+	// characters from the gathered content. Content might be wrapped or formatted
+	// in a certain way which makes it necessary to trim spaces in order to cary
+	// out sanitized content for a Tweet on Twitter.
+	wspExp = regexp.MustCompile(`[\n\r\t]`)
+)
+
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
@@ -45,7 +79,7 @@ func mainE(ctx context.Context) error {
 		newLogger.LogCtx(ctx, "level", "debug", "message", "initializing github client")
 
 		c := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: os.Getenv("GITHUB_TWEETER_GITHUB_TOKEN")},
+			&oauth2.Token{AccessToken: githubToken},
 		))
 
 		ghClient = github.NewClient(c)
@@ -64,8 +98,8 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "initializing twitter client")
 
-		config := oauth1.NewConfig(os.Getenv("TWITTER_CONSUMER_KEY"), os.Getenv("TWITTER_CONSUMER_SECRET"))
-		token := oauth1.NewToken(os.Getenv("TWITTER_ACCESS_TOKEN"), os.Getenv("TWITTER_ACCESS_SECRET"))
+		config := oauth1.NewConfig(twitterConsumerKey, twitterConsumerSecret)
+		token := oauth1.NewToken(twitterAccessToken, twitterAccessSecret)
 
 		twClient = twitter.NewClient(config.Client(oauth1.NoContext, token))
 
@@ -109,13 +143,13 @@ func mainE(ctx context.Context) error {
 		newLogger.LogCtx(ctx, "level", "debug", "message", "finding latest commit")
 
 		in := &github.CommitsListOptions{
-			Path: "philosophy",
+			Path: dir,
 			ListOptions: github.ListOptions{
 				PerPage: 1,
 			},
 		}
 
-		out, _, err := ghClient.Repositories.ListCommits(ctx, "xh3b4sd", "content", in)
+		out, _, err := ghClient.Repositories.ListCommits(ctx, org, repo, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -134,7 +168,7 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "finding latest file")
 
-		out, _, err := ghClient.Repositories.GetCommit(ctx, "xh3b4sd", "content", sha)
+		out, _, err := ghClient.Repositories.GetCommit(ctx, org, repo, sha)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -155,7 +189,7 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "computing total number of files")
 
-		m := regexp.MustCompile(`([0-9]+)$`).FindString(file)
+		m := seqExp.FindString(file)
 
 		number, err = strconv.Atoi(m)
 		if err != nil {
@@ -165,6 +199,12 @@ func mainE(ctx context.Context) error {
 		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", number))
 	}
 
+	// We compute a random file of which we take the content to tweet from. Since
+	// we have the number of the upper end of the file sequence we generate a
+	// random number and put together the new file name including eventual
+	// padding. Padding is necessary because the upper number might have 4 digits
+	// while the chosen number might have 2, which implies to add a padding of 2
+	// padding characters assuming a consistent conventional file name format.
 	var path string
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "chosing random file")
@@ -174,9 +214,10 @@ func mainE(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 		n := strconv.Itoa(i)
-		p := len(file) - len(regexp.MustCompile(`([0-9]+)$`).ReplaceAllString(file, "")) - len(n)
+		p := len(file) - len(seqExp.ReplaceAllString(file, "")) - len(n)
 
-		path += "philosophy/"
+		path += dir
+		path += "/"
 		for i := 0; i < p; i++ {
 			path += "0"
 		}
@@ -191,7 +232,7 @@ func mainE(ctx context.Context) error {
 
 		in := &github.RepositoryContentGetOptions{}
 
-		out, _, _, err := ghClient.Repositories.GetContents(ctx, "xh3b4sd", "content", path, in)
+		out, _, _, err := ghClient.Repositories.GetContents(ctx, org, repo, path, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -201,7 +242,7 @@ func mainE(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		content = strings.TrimSpace(regexp.MustCompile(`[\n\r\t]`).ReplaceAllString(c, " "))
+		content = strings.TrimSpace(wspExp.ReplaceAllString(c, " "))
 
 		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found content %#q", content))
 	}
@@ -213,7 +254,7 @@ func mainE(ctx context.Context) error {
 	//
 	var userName string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "verifying twitter credentials")
+		newLogger.LogCtx(ctx, "level", "debug", "message", "verifying twitter credentials for user")
 
 		p := &twitter.AccountVerifyParams{
 			SkipStatus: twitter.Bool(true),
@@ -225,7 +266,7 @@ func mainE(ctx context.Context) error {
 
 		userName = user.ScreenName
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", "verified twitter credentials")
+		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
 	}
 
 	// Once the necessary content is gathered it can be tweeted using the Twitter
@@ -236,14 +277,14 @@ func mainE(ctx context.Context) error {
 	//     https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
 	//
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("tweeting on behalf of user %#q", userName))
+		newLogger.LogCtx(ctx, "level", "debug", "message", "tweeting content")
 
 		_, _, err := twClient.Statuses.Update(content, nil)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("tweeted on behalf of user %#q", userName))
+		newLogger.LogCtx(ctx, "level", "debug", "message", "tweeted content")
 	}
 
 	return nil
