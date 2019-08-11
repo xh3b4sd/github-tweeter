@@ -207,7 +207,7 @@ func mainE(ctx context.Context) error {
 	// padding characters assuming a consistent conventional file name format.
 	var path string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "chosing random file")
+		newLogger.LogCtx(ctx, "level", "debug", "message", "choosing random file")
 
 		i, err := newRandom.CreateMax(number + 1)
 		if err != nil {
