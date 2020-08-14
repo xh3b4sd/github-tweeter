@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -57,7 +58,7 @@ var (
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
-		panic(microerror.Stack(err))
+		panic(microerror.JSON(err))
 	}
 }
 
@@ -185,18 +186,51 @@ func mainE(ctx context.Context) error {
 	//
 	//     55
 	//
-	var number int
+	var total int
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "computing total number of files")
 
 		m := seqExp.FindString(file)
 
-		number, err = strconv.Atoi(m)
+		total, err = strconv.Atoi(m)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", number))
+		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", total))
+	}
+
+	var number int
+	{
+		newLogger.LogCtx(ctx, "level", "debug", "message", "choosing random number")
+
+		number, err = newRandom.CreateMax(total + 1)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %#q", number))
+	}
+
+	// The content repo structure is as follows.
+	//
+	//     philosophy/2020/0000568
+	//
+	// We need to identify the years, that is sub folders in case we chose a
+	// random number that refers to content written in another year.
+	//
+	var years []string
+	{
+		in := &github.RepositoryContentGetOptions{}
+
+		_, out, _, err := ghClient.Repositories.GetContents(ctx, org, repo, dir, in)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		for _, d := range out {
+			years = append(years, d.GetName())
+		}
 	}
 
 	// We compute a random file of which we take the content to tweet from. Since
@@ -205,44 +239,43 @@ func mainE(ctx context.Context) error {
 	// padding. Padding is necessary because the upper number might have 4 digits
 	// while the chosen number might have 2, which implies to add a padding of 2
 	// padding characters assuming a consistent conventional file name format.
-	var path string
+	var paths []string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "choosing random file")
-
-		i, err := newRandom.CreateMax(number + 1)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		n := strconv.Itoa(i)
+		n := strconv.Itoa(number)
 		p := len(file) - len(seqExp.ReplaceAllString(file, "")) - len(n)
 
-		path += dir
-		path += "/"
-		for i := 0; i < p; i++ {
-			path += "0"
-		}
-		path += n
+		for _, y := range years {
+			path := dir + "/" + y + "/"
+			for i := 0; i < p; i++ {
+				path += "0"
+			}
+			path += n
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("chose random file %#q", path))
+			paths = append(paths, path)
+		}
 	}
 
 	var content string
 	{
 		newLogger.LogCtx(ctx, "level", "debug", "message", "finding content")
 
-		in := &github.RepositoryContentGetOptions{}
+		for _, p := range paths {
+			in := &github.RepositoryContentGetOptions{}
 
-		out, _, _, err := ghClient.Repositories.GetContents(ctx, org, repo, path, in)
-		if err != nil {
-			return microerror.Mask(err)
+			out, _, r, err := ghClient.Repositories.GetContents(ctx, org, repo, p, in)
+			if r.StatusCode == http.StatusNotFound {
+				continue
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			c, err := out.GetContent()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			content = strings.TrimSpace(wspExp.ReplaceAllString(c, " "))
 		}
-
-		c, err := out.GetContent()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		content = strings.TrimSpace(wspExp.ReplaceAllString(c, " "))
 
 		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found content %#q", content))
 	}
