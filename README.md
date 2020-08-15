@@ -43,3 +43,30 @@ $ go run main.go
 {"caller":"github-tweeter/main.go:313","level":"debug","message":"tweeting content","time":"2020-08-15T12:12:48.061456+00:00"}
 {"caller":"github-tweeter/main.go:320","level":"debug","message":"tweeted content","time":"2020-08-15T12:12:48.269885+00:00"}
 ```
+
+
+### Automation
+
+```
+$ cat ~/scripts/tweet.sh
+#!/bin/bash
+
+# This script is executed by a crontab every 4 hours in order to automatically
+# tweet philosophical lines from my content repository.
+#
+#     https://github.com/xh3b4sd/content
+#
+
+export GITHUB_TWEETER_GITHUB_TOKEN=$(cat ~/.credential/github-tweeter-github-token)
+export TWITTER_CONSUMER_KEY=$(cat ~/.credential/twitter-consumer-key)
+export TWITTER_CONSUMER_SECRET=$(cat ~/.credential/twitter-consumer-secret)
+export TWITTER_ACCESS_TOKEN=$(cat ~/.credential/twitter-access-token)
+export TWITTER_ACCESS_SECRET=$(cat ~/.credential/twitter-access-secret)
+
+/Users/xh3b4sd/go/src/github.com/xh3b4sd/github-tweeter/github-tweeter
+```
+
+```
+$ crontab -l
+0 */4 * * * /Users/xh3b4sd/scripts/tweet.sh
+```
