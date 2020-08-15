@@ -209,7 +209,7 @@ func mainE(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %#q", number))
+		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %d", number))
 	}
 
 	// The content repo structure is as follows.
