@@ -8,7 +8,7 @@ require (
 	github.com/dghubble/oauth1 v0.6.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/microerror v0.2.1
-	github.com/giantswarm/micrologger v0.3.1
+	github.com/giantswarm/micrologger v0.3.3
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/juju/errgo v0.0.0-20140925100237-08cceb5d0b53 // indirect
 	github.com/the-anna-project/random v0.0.0-20161220231014-3737a3bfd4b8
