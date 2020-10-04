@@ -13,11 +13,11 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 	"github.com/google/go-github/github"
-	"github.com/the-anna-project/random"
+	"github.com/xh3b4sd/budget"
+	"github.com/xh3b4sd/logger"
+	"github.com/xh3b4sd/random"
+	"github.com/xh3b4sd/tracer"
 	"golang.org/x/oauth2"
 )
 
@@ -58,26 +58,26 @@ var (
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
-		panic(microerror.JSON(err))
+		tracer.Panic(err)
 	}
 }
 
 func mainE(ctx context.Context) error {
 	var err error
 
-	var newLogger micrologger.Logger
+	var newLogger logger.Interface
 	{
-		c := micrologger.Config{}
+		c := logger.Config{}
 
-		newLogger, err = micrologger.New(c)
+		newLogger, err = logger.New(c)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 	}
 
 	var ghClient *github.Client
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "initializing github client")
+		newLogger.Log(ctx, "level", "debug", "message", "initializing github client")
 
 		c := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
@@ -85,7 +85,7 @@ func mainE(ctx context.Context) error {
 
 		ghClient = github.NewClient(c)
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", "initialized github client")
+		newLogger.Log(ctx, "level", "debug", "message", "initialized github client")
 	}
 
 	// Create a Twitter API client for further use below. The required credentials
@@ -97,31 +97,42 @@ func mainE(ctx context.Context) error {
 	//
 	var twClient *twitter.Client
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "initializing twitter client")
+		newLogger.Log(ctx, "level", "debug", "message", "initializing twitter client")
 
 		config := oauth1.NewConfig(twitterConsumerKey, twitterConsumerSecret)
 		token := oauth1.NewToken(twitterAccessToken, twitterAccessSecret)
 
 		twClient = twitter.NewClient(config.Client(oauth1.NoContext, token))
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", "initialized twitter client")
+		newLogger.Log(ctx, "level", "debug", "message", "initialized twitter client")
 	}
 
-	var newRandom random.Service
+	var newBudget budget.Interface
 	{
-		c := random.ServiceConfig{
-			BackoffFactory: func() random.Backoff {
-				return backoff.NewMaxRetries(3, time.Second)
-			},
-			RandFactory: rand.Int,
-
-			RandReader: rand.Reader,
-			Timeout:    1 * time.Second,
+		c := budget.ConstantConfig{
+			Budget:   3,
+			Duration: 1 * time.Second,
 		}
 
-		newRandom, err = random.NewService(c)
+		newBudget, err = budget.NewConstant(c)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
+		}
+	}
+
+	var newRandom random.Interface
+	{
+		c := random.Config{
+			Budget:     newBudget,
+			RandFunc:   rand.Int,
+			RandReader: rand.Reader,
+
+			Timeout: 1 * time.Second,
+		}
+
+		newRandom, err = random.New(c)
+		if err != nil {
+			return tracer.Mask(err)
 		}
 	}
 
@@ -146,7 +157,7 @@ func mainE(ctx context.Context) error {
 	//
 	var sha string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "finding latest commit")
+		newLogger.Log(ctx, "level", "debug", "message", "finding latest commit")
 
 		in := &github.CommitsListOptions{
 			Path: dir,
@@ -157,7 +168,7 @@ func mainE(ctx context.Context) error {
 
 		out, _, err := ghClient.Repositories.ListCommits(ctx, org, repo, in)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
 		var n int
@@ -174,7 +185,7 @@ func mainE(ctx context.Context) error {
 
 			c, err := strconv.Atoi(b[0])
 			if err != nil {
-				return microerror.Mask(err)
+				return tracer.Mask(err)
 			}
 
 			if c > n {
@@ -183,7 +194,7 @@ func mainE(ctx context.Context) error {
 			}
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found latest commit %#q", sha))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found latest commit %#q", sha))
 	}
 
 	// We fetch the file name using the commit hash found above. The commit is
@@ -193,16 +204,16 @@ func mainE(ctx context.Context) error {
 	//
 	var file string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "finding latest file")
+		newLogger.Log(ctx, "level", "debug", "message", "finding latest file")
 
 		out, _, err := ghClient.Repositories.GetCommit(ctx, org, repo, sha)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
 		file = out.Files[0].GetFilename()
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found latest file %#q", file))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found latest file %#q", file))
 	}
 
 	// We lookup the number of files in the traversed folder. The name of the
@@ -214,28 +225,28 @@ func mainE(ctx context.Context) error {
 	//
 	var total int
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "computing total number of files")
+		newLogger.Log(ctx, "level", "debug", "message", "computing total number of files")
 
 		m := seqExp.FindString(file)
 
 		total, err = strconv.Atoi(m)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", total))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", total))
 	}
 
 	var number int
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "choosing random number")
+		newLogger.Log(ctx, "level", "debug", "message", "choosing random number")
 
-		number, err = newRandom.CreateMax(total + 1)
+		number, err = newRandom.Max(total + 1)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %d", number))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %d", number))
 	}
 
 	// The content repo structure is as follows.
@@ -251,7 +262,7 @@ func mainE(ctx context.Context) error {
 
 		_, out, _, err := ghClient.Repositories.GetContents(ctx, org, repo, dir, in)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
 		for _, d := range out {
@@ -283,7 +294,7 @@ func mainE(ctx context.Context) error {
 
 	var content string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "finding content")
+		newLogger.Log(ctx, "level", "debug", "message", "finding content")
 
 		for _, p := range paths {
 			in := &github.RepositoryContentGetOptions{}
@@ -292,18 +303,18 @@ func mainE(ctx context.Context) error {
 			if r.StatusCode == http.StatusNotFound {
 				continue
 			} else if err != nil {
-				return microerror.Mask(err)
+				return tracer.Mask(err)
 			}
 
 			c, err := out.GetContent()
 			if err != nil {
-				return microerror.Mask(err)
+				return tracer.Mask(err)
 			}
 
 			content = strings.TrimSpace(wspExp.ReplaceAllString(c, " "))
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found content %#q", content))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found content %#q", content))
 	}
 
 	// We just make sure that we deal with valid credentials and collect
@@ -313,19 +324,19 @@ func mainE(ctx context.Context) error {
 	//
 	var userName string
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "verifying twitter credentials for user")
+		newLogger.Log(ctx, "level", "debug", "message", "verifying twitter credentials for user")
 
 		p := &twitter.AccountVerifyParams{
 			SkipStatus: twitter.Bool(true),
 		}
 		user, _, err := twClient.Accounts.VerifyCredentials(p)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
 		userName = user.ScreenName
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
+		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
 	}
 
 	// Once the necessary content is gathered it can be tweeted using the Twitter
@@ -336,14 +347,14 @@ func mainE(ctx context.Context) error {
 	//     https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
 	//
 	{
-		newLogger.LogCtx(ctx, "level", "debug", "message", "tweeting content")
+		newLogger.Log(ctx, "level", "debug", "message", "tweeting content")
 
 		_, _, err := twClient.Statuses.Update(content, nil)
 		if err != nil {
-			return microerror.Mask(err)
+			return tracer.Mask(err)
 		}
 
-		newLogger.LogCtx(ctx, "level", "debug", "message", "tweeted content")
+		newLogger.Log(ctx, "level", "debug", "message", "tweeted content")
 	}
 
 	return nil
