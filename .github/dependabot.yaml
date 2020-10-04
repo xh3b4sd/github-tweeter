@@ -1,0 +1,29 @@
+#
+# Do not edit. This file was generated via the "workflow" command line tool.
+# More information about the tool can be found at github.com/xh3b4sd/workflow.
+#
+#     workflow generate dependabot
+#
+
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "xh3b4sd"
+    schedule:
+      interval: "daily"
+      time: "04:00"
+    target-branch: "master"
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "xh3b4sd"
+    schedule:
+      interval: "daily"
+      time: "04:00"
+    target-branch: "master"

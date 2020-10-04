@@ -1,0 +1,69 @@
+#
+# Do not edit. This file was generated via the "workflow" command line tool.
+# More information about the tool can be found at github.com/xh3b4sd/workflow.
+#
+#     workflow generate dependabot
+#
+
+name: go-mod-tidy
+
+on:
+  push:
+    branches:
+      - 'dependabot/**'
+    paths:
+    - 'go.mod'
+
+jobs:
+  go-mod-tidy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Git Project
+        uses: actions/checkout@v2
+
+      - name: Setup Go Env
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.2'
+
+      - name: Decrypt Private Key
+        run: |
+          go get github.com/xh3b4sd/red
+          red decrypt -i .github/asset/id_rsa.enc -o .github/asset/id_rsa -p '${{ secrets.RED_GPG_PASS }}'
+
+      - name: Setup SSH Agent
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null
+          chmod 0600 .github/asset/id_rsa
+          ssh-add .github/asset/id_rsa
+
+      - name: Setup Git Config
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
+
+      - name: Go Mod Tidy
+        run: |
+          rm -f go.sum
+          go mod tidy
+
+      - name: Commit And Push
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          git add go.mod go.sum
+          git commit -m 'go mod tidy'
+          git push
+
+      - name: Cleanup Build Container
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-add -D
+          rm -Rf *
