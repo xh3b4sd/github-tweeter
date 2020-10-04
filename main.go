@@ -125,13 +125,18 @@ func mainE(ctx context.Context) error {
 		}
 	}
 
-	// Fetch the latest commit made in the configured folder. The sha is used to
-	// get its associated file which changed with the commit. The name of this
-	// file then by convention indicates the highest number of files in the
-	// sequence of existing file names. The example file names below describe the
-	// convention of numbers defining the file sequence. The method below fetches
-	// the sha that assumedly added file055 which tells us that there are 55 files
-	// to chose from randomly.
+	// Fetch the commit of the latest content made in the configured folder. It
+	// might happen that commits have been made to fix typos which means that
+	// these commits are made on older content files. We want the latest content
+	// and therefore check the last 10 commits which should give us enough
+	// buffer to fix and improve existing content before we get the chance to
+	// add actually new content which is numbered accordingly. The sha we are
+	// looking for is then used to get its associated file which changed with
+	// the commit. The name of this file then by convention indicates the
+	// highest number of files in the sequence of existing file names. The
+	// example file names below describe the convention of numbers defining the
+	// file sequence. The method below fetches the sha that assumedly added
+	// file055 which tells us that there are 55 files to chose from randomly.
 	//
 	//     path/file001
 	//     path/file002
@@ -146,7 +151,7 @@ func mainE(ctx context.Context) error {
 		in := &github.CommitsListOptions{
 			Path: dir,
 			ListOptions: github.ListOptions{
-				PerPage: 1,
+				PerPage: 10,
 			},
 		}
 
@@ -155,7 +160,28 @@ func mainE(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		sha = out[0].GetSHA()
+		var n int
+		for _, o := range out {
+			a := strings.Split(o.GetCommit().GetMessage(), "/")
+			if len(a) != 2 {
+				continue
+			}
+
+			b := strings.Split(a[1], " ")
+			if len(b) != 2 {
+				continue
+			}
+
+			c, err := strconv.Atoi(b[0])
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if c > n {
+				n = c
+				sha = o.GetSHA()
+			}
+		}
 
 		newLogger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found latest commit %#q", sha))
 	}
