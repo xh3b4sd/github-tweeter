@@ -2,7 +2,7 @@
 # Do not edit. This file was generated via the "workflow" command line tool.
 # More information about the tool can be found at github.com/xh3b4sd/workflow.
 #
-#     workflow generate dependabot
+#     workflow create dependabot -b master -r xh3b4sd
 #
 
 version: 2
