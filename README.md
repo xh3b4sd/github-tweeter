@@ -36,6 +36,7 @@ $ go run main.go
 ### Automation
 
 ```
+$ cat ~/scripts/tweet.sh
 #!/bin/bash
 
 # This script is executed by a crontab every 4 hours in order to automatically
