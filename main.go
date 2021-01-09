@@ -28,12 +28,11 @@ const (
 )
 
 var (
-	githubToken = os.Getenv("GITHUB_TWEETER_GITHUB_TOKEN")
-
-	twitterConsumerKey    = os.Getenv("TWITTER_CONSUMER_KEY")
-	twitterConsumerSecret = os.Getenv("TWITTER_CONSUMER_SECRET")
-	twitterAccessToken    = os.Getenv("TWITTER_ACCESS_TOKEN")
-	twitterAccessSecret   = os.Getenv("TWITTER_ACCESS_SECRET")
+	githubToken           = os.Getenv("GITHUB_TWEETER_GITHUB_TOKEN")
+	twitterConsumerKey    = os.Getenv("GITHUB_TWEETER_TWITTER_CONSUMER_KEY")
+	twitterConsumerSecret = os.Getenv("GITHUB_TWEETER_TWITTER_CONSUMER_SECRET")
+	twitterAccessToken    = os.Getenv("GITHUB_TWEETER_TWITTER_ACCESS_TOKEN")
+	twitterAccessSecret   = os.Getenv("GITHUB_TWEETER_TWITTER_ACCESS_SECRET")
 )
 
 var (
@@ -77,7 +76,7 @@ func mainE(ctx context.Context) error {
 
 	var ghClient *github.Client
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "initializing github client")
+		newLogger.Log(ctx, "level", "info", "message", "initializing github client")
 
 		c := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
@@ -85,7 +84,7 @@ func mainE(ctx context.Context) error {
 
 		ghClient = github.NewClient(c)
 
-		newLogger.Log(ctx, "level", "debug", "message", "initialized github client")
+		newLogger.Log(ctx, "level", "info", "message", "initialized github client")
 	}
 
 	// Create a Twitter API client for further use below. The required credentials
@@ -97,14 +96,14 @@ func mainE(ctx context.Context) error {
 	//
 	var twClient *twitter.Client
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "initializing twitter client")
+		newLogger.Log(ctx, "level", "info", "message", "initializing twitter client")
 
 		config := oauth1.NewConfig(twitterConsumerKey, twitterConsumerSecret)
 		token := oauth1.NewToken(twitterAccessToken, twitterAccessSecret)
 
 		twClient = twitter.NewClient(config.Client(oauth1.NoContext, token))
 
-		newLogger.Log(ctx, "level", "debug", "message", "initialized twitter client")
+		newLogger.Log(ctx, "level", "info", "message", "initialized twitter client")
 	}
 
 	var newBudget budget.Interface
@@ -157,7 +156,7 @@ func mainE(ctx context.Context) error {
 	//
 	var sha string
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "finding latest commit")
+		newLogger.Log(ctx, "level", "info", "message", "finding latest commit")
 
 		in := &github.CommitsListOptions{
 			Path: dir,
@@ -194,7 +193,7 @@ func mainE(ctx context.Context) error {
 			}
 		}
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found latest commit %#q", sha))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("found latest commit %#q", sha))
 	}
 
 	// We fetch the file name using the commit hash found above. The commit is
@@ -204,7 +203,7 @@ func mainE(ctx context.Context) error {
 	//
 	var file string
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "finding latest file")
+		newLogger.Log(ctx, "level", "info", "message", "finding latest file")
 
 		out, _, err := ghClient.Repositories.GetCommit(ctx, org, repo, sha)
 		if err != nil {
@@ -213,7 +212,7 @@ func mainE(ctx context.Context) error {
 
 		file = out.Files[0].GetFilename()
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found latest file %#q", file))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("found latest file %#q", file))
 	}
 
 	// We lookup the number of files in the traversed folder. The name of the
@@ -225,7 +224,7 @@ func mainE(ctx context.Context) error {
 	//
 	var total int
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "computing total number of files")
+		newLogger.Log(ctx, "level", "info", "message", "computing total number of files")
 
 		m := seqExp.FindString(file)
 
@@ -234,19 +233,19 @@ func mainE(ctx context.Context) error {
 			return tracer.Mask(err)
 		}
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("computed total number of files %d", total))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("computed total number of files %d", total))
 	}
 
 	var number int
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "choosing random number")
+		newLogger.Log(ctx, "level", "info", "message", "choosing random number")
 
 		number, err = newRandom.Max(total + 1)
 		if err != nil {
 			return tracer.Mask(err)
 		}
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("chose random number %d", number))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("chose random number %d", number))
 	}
 
 	// The content repo structure is as follows.
@@ -294,7 +293,7 @@ func mainE(ctx context.Context) error {
 
 	var content string
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "finding content")
+		newLogger.Log(ctx, "level", "info", "message", "finding content")
 
 		for _, p := range paths {
 			in := &github.RepositoryContentGetOptions{}
@@ -314,7 +313,7 @@ func mainE(ctx context.Context) error {
 			content = strings.TrimSpace(wspExp.ReplaceAllString(c, " "))
 		}
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("found content %#q", content))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("found content %#q", content))
 	}
 
 	// We just make sure that we deal with valid credentials and collect
@@ -324,7 +323,7 @@ func mainE(ctx context.Context) error {
 	//
 	var userName string
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "verifying twitter credentials for user")
+		newLogger.Log(ctx, "level", "info", "message", "verifying twitter credentials for user")
 
 		p := &twitter.AccountVerifyParams{
 			SkipStatus: twitter.Bool(true),
@@ -336,7 +335,7 @@ func mainE(ctx context.Context) error {
 
 		userName = user.ScreenName
 
-		newLogger.Log(ctx, "level", "debug", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
 	}
 
 	// Once the necessary content is gathered it can be tweeted using the Twitter
@@ -347,14 +346,14 @@ func mainE(ctx context.Context) error {
 	//     https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
 	//
 	{
-		newLogger.Log(ctx, "level", "debug", "message", "tweeting content")
+		newLogger.Log(ctx, "level", "info", "message", "tweeting content")
 
 		_, _, err := twClient.Statuses.Update(content, nil)
 		if err != nil {
 			return tracer.Mask(err)
 		}
 
-		newLogger.Log(ctx, "level", "debug", "message", "tweeted content")
+		newLogger.Log(ctx, "level", "info", "message", "tweeted content")
 	}
 
 	return nil
