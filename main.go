@@ -172,17 +172,17 @@ func mainE(ctx context.Context) error {
 
 		var n int
 		for _, o := range out {
-			a := strings.Split(o.GetCommit().GetMessage(), "/")
-			if len(a) != 2 {
+			a := strings.Split(o.GetCommit().GetMessage(), " ")
+			if len(a) < 2 {
 				continue
 			}
 
-			b := strings.Split(a[1], " ")
-			if len(b) != 2 {
+			b := strings.Split(a[1], "/")
+			if len(b) < 2 {
 				continue
 			}
 
-			c, err := strconv.Atoi(b[0])
+			c, err := strconv.Atoi(b[len(b)-1])
 			if err != nil {
 				return tracer.Mask(err)
 			}
