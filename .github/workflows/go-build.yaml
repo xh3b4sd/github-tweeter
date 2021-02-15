@@ -2,36 +2,43 @@
 # Do not edit. This file was generated via the "workflow" command line tool.
 # More information about the tool can be found at github.com/xh3b4sd/workflow.
 #
-#     workflow generate golang
+#     workflow create golang
 #
 
-name: go-build
+name: "go-build"
 
-on: push
+on: "push"
 
 jobs:
   go-build:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
 
-      - name: Checkout Git Project
-        uses: actions/checkout@v2
+      - name: "Setup Git Project"
+        uses: "actions/checkout@v2"
 
-      - name: Setup Go Env
-        uses: actions/setup-go@v2
+      - name: "Setup Go Env"
+        uses: "actions/setup-go@v2"
         with:
-          go-version: '1.15.2'
+          go-version: "1.15.2"
 
-      - name: Check Go Dependencies
-        run: go mod tidy && git diff --exit-code
+      - name: "Check Go Dependencies"
+        run: |
+          go mod tidy
+          git diff --exit-code
 
-      - name: Check Go Tests
-        run: go test ./...
+      - name: "Check Go Tests"
+        run: |
+          go test ./... -race
 
-      - name: Check Go Formatting
-        run: test -z $(gofmt -l -s .)
+      - name: "Check Go Formatting"
+        run: |
+          test -z $(gofmt -l -s .)
 
-      - name: Check Go Linters
-        uses: golangci/golangci-lint-action@v2.3.0
-        with:
-          version: v1.31
+      - name: "Check Go Linters"
+        env:
+          VERSION: "1.32.1"
+        run: |
+          curl -LOs https://github.com/golangci/golangci-lint/releases/download/v${VERSION}/golangci-lint-${VERSION}-linux-amd64.tar.gz
+          tar -xzf golangci-lint-${VERSION}-linux-amd64.tar.gz
+          ./golangci-lint-${VERSION}-linux-amd64/golangci-lint run
