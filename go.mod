@@ -7,7 +7,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/xh3b4sd/budget v0.2.1
-	github.com/xh3b4sd/logger v0.1.2
+	github.com/xh3b4sd/logger v0.2.0
 	github.com/xh3b4sd/random v0.2.1
 	github.com/xh3b4sd/tracer v0.4.0
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
