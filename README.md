@@ -36,7 +36,7 @@ $ go run main.go
 ### Automation
 
 ```
-$ cat ~/scripts/tweet.sh
+$ cat ~/.script/github-tweeter.sh
 #!/bin/bash
 
 # This script is executed by a crontab every 4 hours in order to automatically
@@ -56,5 +56,5 @@ export GITHUB_TWEETER_TWITTER_CONSUMER_SECRET=$(cat ~/.credential/github-tweeter
 
 ```
 $ crontab -l
-0 */4 * * * /Users/xh3b4sd/.script/tweet.sh
+0 */4 * * * /Users/xh3b4sd/.script/github-tweeter.sh
 ```
