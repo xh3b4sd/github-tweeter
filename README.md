@@ -55,6 +55,11 @@ export GITHUB_TWEETER_TWITTER_CONSUMER_SECRET=$(cat ~/.credential/github-tweeter
 ```
 
 ```
+export VISUAL=vim
+crontab -e
+```
+
+```
 $ crontab -l
 0 */4 * * * /Users/xh3b4sd/.script/github-tweeter.sh
 ```
