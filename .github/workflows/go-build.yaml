@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: "Setup Git Project"
-        uses: "actions/checkout@v2.4.0"
+        uses: "actions/checkout@v3"
 
       - name: "Setup Go Env"
         uses: "actions/setup-go@v2"
