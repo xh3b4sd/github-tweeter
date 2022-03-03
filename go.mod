@@ -9,7 +9,7 @@ require (
 	github.com/xh3b4sd/budget v0.2.1
 	github.com/xh3b4sd/logger v0.3.0
 	github.com/xh3b4sd/random v0.2.1
-	github.com/xh3b4sd/tracer v0.4.0
+	github.com/xh3b4sd/tracer v0.5.0
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 )
