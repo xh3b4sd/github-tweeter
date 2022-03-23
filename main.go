@@ -15,6 +15,8 @@ import (
 	"github.com/dghubble/oauth1"
 	"github.com/google/go-github/github"
 	"github.com/xh3b4sd/budget"
+	"github.com/xh3b4sd/budget/pkg/constant"
+	"github.com/xh3b4sd/budget/pkg/timeout"
 	"github.com/xh3b4sd/logger"
 	"github.com/xh3b4sd/random"
 	"github.com/xh3b4sd/tracer"
@@ -106,32 +108,44 @@ func mainE(ctx context.Context) error {
 		newLogger.Log(ctx, "level", "info", "message", "initialized twitter client")
 	}
 
-	var newBudget budget.Interface
+	var con budget.Interface
 	{
-		c := budget.ConstantConfig{
+		c := constant.Config{
 			Budget:   3,
-			Duration: 1 * time.Second,
+			Cooldown: 1 * time.Second,
 		}
 
-		newBudget, err = budget.NewConstant(c)
+		con, err = constant.New(c)
 		if err != nil {
-			return tracer.Mask(err)
+			panic(err)
 		}
 	}
 
-	var newRandom random.Interface
+	var tim budget.Interface
 	{
-		c := random.Config{
-			Budget:     newBudget,
-			RandFunc:   rand.Int,
-			RandReader: rand.Reader,
-
-			Timeout: 1 * time.Second,
+		c := timeout.Config{
+			Budget:  con,
+			Repeat:  1,
+			Timeout: 3 * time.Second,
 		}
 
-		newRandom, err = random.New(c)
+		tim, err = timeout.New(c)
 		if err != nil {
-			return tracer.Mask(err)
+			panic(err)
+		}
+	}
+
+	var ran random.Interface
+	{
+		c := random.Config{
+			Budget:     tim,
+			RandFunc:   rand.Int,
+			RandReader: rand.Reader,
+		}
+
+		ran, err = random.New(c)
+		if err != nil {
+			panic(err)
 		}
 	}
 
@@ -240,7 +254,7 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.Log(ctx, "level", "info", "message", "choosing random number")
 
-		number, err = newRandom.Max(total + 1)
+		number, err = ran.Max(total + 1)
 		if err != nil {
 			return tracer.Mask(err)
 		}
