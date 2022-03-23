@@ -6,9 +6,9 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20200725221434-4bc8ad7ad1b4
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/xh3b4sd/budget v1.1.2
+	github.com/xh3b4sd/budget/v2 v2.0.2
 	github.com/xh3b4sd/logger v0.3.0
-	github.com/xh3b4sd/random v0.4.0
+	github.com/xh3b4sd/random v0.5.0
 	github.com/xh3b4sd/tracer v0.5.0
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 )

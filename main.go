@@ -14,9 +14,9 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/google/go-github/github"
-	"github.com/xh3b4sd/budget"
-	"github.com/xh3b4sd/budget/pkg/constant"
-	"github.com/xh3b4sd/budget/pkg/timeout"
+	"github.com/xh3b4sd/budget/v2"
+	"github.com/xh3b4sd/budget/v2/pkg/constant"
+	"github.com/xh3b4sd/budget/v2/pkg/timeout"
 	"github.com/xh3b4sd/logger"
 	"github.com/xh3b4sd/random"
 	"github.com/xh3b4sd/tracer"
@@ -111,8 +111,8 @@ func mainE(ctx context.Context) error {
 	var con budget.Interface
 	{
 		c := constant.Config{
-			Budget:   3,
-			Cooldown: 1 * time.Second,
+			Cooldown:   1 * time.Second,
+			Executions: 3,
 		}
 
 		con, err = constant.New(c)
@@ -125,7 +125,6 @@ func mainE(ctx context.Context) error {
 	{
 		c := timeout.Config{
 			Budget:  con,
-			Repeat:  1,
 			Timeout: 3 * time.Second,
 		}
 
