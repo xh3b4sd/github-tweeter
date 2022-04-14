@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/xh3b4sd/budget/v2 v2.3.0
 	github.com/xh3b4sd/logger v0.3.0
-	github.com/xh3b4sd/random v0.5.0
+	github.com/xh3b4sd/random v0.6.0
 	github.com/xh3b4sd/tracer v0.5.0
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 )
