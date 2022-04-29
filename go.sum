@@ -130,10 +130,12 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/xh3b4sd/budget/v2 v2.3.0 h1:Ny/zkqBTbOvpZiCOeDZU/HuCUu0ldzqhaUROajbF79c=
 github.com/xh3b4sd/budget/v2 v2.3.0/go.mod h1:uJiv9+sBsWkKkBWVBrHGYAJzgrLmQdtGXpesXp0QL0g=
+github.com/xh3b4sd/budget/v3 v3.0.1 h1:JPe7C82PGYAzNH7PgrdFr5d6JN6lOFDZEM6wiHF2BEU=
+github.com/xh3b4sd/budget/v3 v3.0.1/go.mod h1:MTVRRQwDtLVMvjIVKCFF7mVpC6vTFrrdFyZRPu20jc4=
 github.com/xh3b4sd/logger v0.4.0 h1:Rzp2UfWE2VpI2hlwnJUXisJTJW+5Y7sfjUsQ6l4ol6o=
 github.com/xh3b4sd/logger v0.4.0/go.mod h1:UAA6KA1rnbFzzPv9FEN6k3OEHhn3pWOtmEcbYRt7Nqg=
-github.com/xh3b4sd/random v0.6.0 h1:fbX3zZqGXK5+l6EgFqi7q2lZyxLVWqOdo6cWj4tsjss=
-github.com/xh3b4sd/random v0.6.0/go.mod h1:Yl/GqrkSHhvYARk/IWo1jwg1/eqjkEXBk2UhfPo4XaA=
+github.com/xh3b4sd/random v0.6.1 h1:IFI1YbD3059VHtXzCNfIZ7oRSoclVWL4TBgOHJt6bJU=
+github.com/xh3b4sd/random v0.6.1/go.mod h1:Pe5aJ80fcny+XkGcrr0mMTaQx6/JUcCRm3yqt/zwOkM=
 github.com/xh3b4sd/tracer v0.5.0 h1:KglVpem7dGWfNdjEXbTUmIt/t2UOTKa3vWpPATqpQvE=
 github.com/xh3b4sd/tracer v0.5.0/go.mod h1:nllAQlwq3YjVc61aNRE8svIEwUngBi9+iKKW9siC5yk=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
