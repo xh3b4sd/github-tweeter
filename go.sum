@@ -133,8 +133,8 @@ github.com/xh3b4sd/budget/v2 v2.3.0 h1:Ny/zkqBTbOvpZiCOeDZU/HuCUu0ldzqhaUROajbF7
 github.com/xh3b4sd/budget/v2 v2.3.0/go.mod h1:uJiv9+sBsWkKkBWVBrHGYAJzgrLmQdtGXpesXp0QL0g=
 github.com/xh3b4sd/budget/v3 v3.1.2 h1:8sgU/XhDZdNHx5HzD7yPjcmAOv5XE1ez+P86tKOZCdk=
 github.com/xh3b4sd/budget/v3 v3.1.2/go.mod h1:quD2a5bhBxoTB8Z0W40/6S21R8smuETt4hjKlSOu4qM=
-github.com/xh3b4sd/logger v0.5.1 h1:y9ZqvkH5nwa8aBIB0jcHUW2KCjYjAUx4VSTydcdG04E=
-github.com/xh3b4sd/logger v0.5.1/go.mod h1:PTSV8DSuxflhKBKaIxc9QK0IbhHUhQAKWUwn+adQoLA=
+github.com/xh3b4sd/logger v0.5.3 h1:dQaiN7pGxgm99m6mF7gUx+/g1TMlN/rNte6445EHcww=
+github.com/xh3b4sd/logger v0.5.3/go.mod h1:PTSV8DSuxflhKBKaIxc9QK0IbhHUhQAKWUwn+adQoLA=
 github.com/xh3b4sd/random v0.6.3 h1:E4s0QGcgZAqiBWFZmmfiHnN/jfqCp+2eB3EB+UFnScU=
 github.com/xh3b4sd/random v0.6.3/go.mod h1:HmtM9mpjIW9gUoPIIupZmOSqwGkpkOROSn3YResnKFY=
 github.com/xh3b4sd/tracer v0.5.0 h1:KglVpem7dGWfNdjEXbTUmIt/t2UOTKa3vWpPATqpQvE=
