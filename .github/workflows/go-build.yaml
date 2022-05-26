@@ -20,7 +20,7 @@ jobs:
       - name: "Setup Go Env"
         uses: "actions/setup-go@v3"
         with:
-          go-version: "1.17.5"
+          go-version: "1.18.2"
 
       - name: "Check Go Dependencies"
         run: |
@@ -36,9 +36,7 @@ jobs:
           test -z $(gofmt -l -s .)
 
       - name: "Check Go Linters"
-        env:
-          VERSION: "1.32.1"
         run: |
-          curl -LOs https://github.com/golangci/golangci-lint/releases/download/v${VERSION}/golangci-lint-${VERSION}-linux-amd64.tar.gz
-          tar -xzf golangci-lint-${VERSION}-linux-amd64.tar.gz
-          ./golangci-lint-${VERSION}-linux-amd64/golangci-lint run
+          curl -LOs https://github.com/golangci/golangci-lint/releases/download/v1.46.2/golangci-lint-1.46.2-linux-amd64.tar.gz
+          tar -xzf golangci-lint-1.46.2-linux-amd64.tar.gz
+          ./golangci-lint-1.46.2-linux-amd64/golangci-lint run
