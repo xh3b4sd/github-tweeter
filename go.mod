@@ -1,6 +1,6 @@
 module github.com/xh3b4sd/github-tweeter
 
-go 1.17
+go 1.18
 
 require (
 	github.com/dghubble/go-twitter v0.0.0-20200725221434-4bc8ad7ad1b4
