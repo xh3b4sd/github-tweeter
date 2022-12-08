@@ -3,7 +3,7 @@ module github.com/xh3b4sd/github-tweeter
 go 1.19
 
 require (
-	github.com/dghubble/oauth1 v0.7.1
+	github.com/dghubble/oauth1 v0.7.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/xh3b4sd/go-gpt3 v0.1.0
 	github.com/xh3b4sd/go-twitter v0.1.0
