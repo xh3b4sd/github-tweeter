@@ -9,13 +9,23 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/google/go-github/github"
+	gogpt3 "github.com/xh3b4sd/go-gpt3"
+	"github.com/xh3b4sd/go-twitter/twitter"
 	"github.com/xh3b4sd/logger"
 	"github.com/xh3b4sd/tracer"
 	"golang.org/x/oauth2"
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+const (
+	masterpiece = "intricate artwork masterpiece, ominous, matte painting movie poster, golden ratio, trending on cgsociety, intricate, epic, trending on artstation, by artgerm, h. r. giger and beksinski, highly detailed, vibrant, production cinematic character render, ultra high quality model"
 )
 
 const (
@@ -30,6 +40,7 @@ var (
 	twitterConsumerSecret = os.Getenv("GITHUB_TWEETER_TWITTER_CONSUMER_SECRET")
 	twitterAccessToken    = os.Getenv("GITHUB_TWEETER_TWITTER_ACCESS_TOKEN")
 	twitterAccessSecret   = os.Getenv("GITHUB_TWEETER_TWITTER_ACCESS_SECRET")
+	openaiAPIKey          = os.Getenv("OPENAI_API_KEY")
 )
 
 var (
@@ -69,6 +80,11 @@ func mainE(ctx context.Context) error {
 		if err != nil {
 			return tracer.Mask(err)
 		}
+	}
+
+	var aiClient *gogpt3.Client
+	{
+		aiClient = gogpt3.NewClient(openaiAPIKey)
 	}
 
 	var ghClient *github.Client
@@ -303,6 +319,45 @@ func mainE(ctx context.Context) error {
 		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("verified twitter credentials for user %#q", userName))
 	}
 
+	var b64img string
+	{
+		newLogger.Log(ctx, "level", "info", "message", "generating image via prompt")
+
+		req := gogpt3.ImageRequest{
+			Prompt:         fmt.Sprintf("%s, %s", content, masterpiece),
+			N:              1,
+			Size:           "1024x1024",
+			ResponseFormat: "b64_json",
+		}
+
+		res, err := aiClient.Images(context.Background(), req)
+		if err != nil {
+			return tracer.Mask(err)
+		}
+
+		b64img = res.Data[0].B64JSON
+
+		newLogger.Log(ctx, "level", "info", "message", "generated image via prompt")
+	}
+
+	var uploid int64
+	{
+		newLogger.Log(ctx, "level", "info", "message", "uploading media")
+
+		req := &twitter.MediaUploadParams{
+			MediaData: b64img,
+		}
+
+		res, _, err := twClient.Media.Upload(req)
+		if err != nil {
+			return tracer.Mask(err)
+		}
+
+		uploid = res.MediaID
+
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("uploaded media %d", uploid))
+	}
+
 	// Once the necessary content is gathered it can be tweeted using the Twitter
 	// client initialized above. For more information about the API client and API
 	// specs see the following resources.
@@ -313,12 +368,18 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.Log(ctx, "level", "info", "message", "tweeting content")
 
-		_, _, err := twClient.Statuses.Update(content, nil)
+		req := &twitter.StatusUpdateParams{
+			MediaIds: []int64{
+				uploid,
+			},
+		}
+
+		res, _, err := twClient.Statuses.Update(content, req)
 		if err != nil {
 			return tracer.Mask(err)
 		}
 
-		newLogger.Log(ctx, "level", "info", "message", "tweeted content")
+		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("tweeted content at https://twitter.com/%s/status/%s", userName, res.IDStr))
 	}
 
 	return nil
