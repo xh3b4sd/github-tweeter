@@ -2,23 +2,18 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/google/go-github/github"
-	"github.com/xh3b4sd/budget/v2"
-	"github.com/xh3b4sd/budget/v2/pkg/constant"
-	"github.com/xh3b4sd/budget/v2/pkg/timeout"
 	"github.com/xh3b4sd/logger"
-	"github.com/xh3b4sd/random"
 	"github.com/xh3b4sd/tracer"
 	"golang.org/x/oauth2"
 )
@@ -106,46 +101,6 @@ func mainE(ctx context.Context) error {
 		twClient = twitter.NewClient(config.Client(oauth1.NoContext, token))
 
 		newLogger.Log(ctx, "level", "info", "message", "initialized twitter client")
-	}
-
-	var con budget.Interface
-	{
-		c := constant.Config{
-			Cooldown:   1 * time.Second,
-			Executions: 3,
-		}
-
-		con, err = constant.New(c)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var tim budget.Interface
-	{
-		c := timeout.Config{
-			Budget:  con,
-			Timeout: 3 * time.Second,
-		}
-
-		tim, err = timeout.New(c)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var ran random.Interface
-	{
-		c := random.Config{
-			Budget:     tim,
-			RandFunc:   rand.Int,
-			RandReader: rand.Reader,
-		}
-
-		ran, err = random.New(c)
-		if err != nil {
-			panic(err)
-		}
 	}
 
 	// Fetch the commit of the latest content made in the configured folder. It
@@ -253,10 +208,7 @@ func mainE(ctx context.Context) error {
 	{
 		newLogger.Log(ctx, "level", "info", "message", "choosing random number")
 
-		number, err = ran.Max(total + 1)
-		if err != nil {
-			return tracer.Mask(err)
-		}
+		number = rand.Intn(total + 1)
 
 		newLogger.Log(ctx, "level", "info", "message", fmt.Sprintf("chose random number %d", number))
 	}
