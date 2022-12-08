@@ -6,7 +6,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/xh3b4sd/go-gpt3 v0.1.0
-	github.com/xh3b4sd/go-twitter v0.1.0
+	github.com/xh3b4sd/go-twitter v0.1.1
 	github.com/xh3b4sd/logger v0.6.0
 	github.com/xh3b4sd/tracer v0.6.0
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43

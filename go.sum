@@ -128,8 +128,8 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/xh3b4sd/go-gpt3 v0.1.0 h1:NUangG2JaISnHLVoX3ytmzcH6XCOndhud+yOftK/YbQ=
 github.com/xh3b4sd/go-gpt3 v0.1.0/go.mod h1:1ajdLpEOQtDBDzk63u+zU979PoEcdJYk3qUiwYVZG2c=
-github.com/xh3b4sd/go-twitter v0.1.0 h1:FSc2b/kWgDXk/mRvB9DaamDAGCJpqJ5xEykI0YS3VtU=
-github.com/xh3b4sd/go-twitter v0.1.0/go.mod h1:v93GMZaGEtMpvywHX7zvmQ3DGXeZa8BCeTatE6aS9vY=
+github.com/xh3b4sd/go-twitter v0.1.1 h1:YdPV9mKOyVwZlQ5+kxRKI30t2i0YLSdKPQK3asrd4Og=
+github.com/xh3b4sd/go-twitter v0.1.1/go.mod h1:v93GMZaGEtMpvywHX7zvmQ3DGXeZa8BCeTatE6aS9vY=
 github.com/xh3b4sd/logger v0.6.0 h1:RUv06v0p2yd1PO/amoDbnvd2BgCtEZZ8NYwb3gjn7eE=
 github.com/xh3b4sd/logger v0.6.0/go.mod h1:HAHJagj3n2JGsk+EubHAc0ZkL7uFn1Jsn0MG3zrqeu4=
 github.com/xh3b4sd/tracer v0.6.0 h1:WMrNsHcWUaCAqMWXogD7IRKC8F6A9Ar4pDF9WcdZsX0=
