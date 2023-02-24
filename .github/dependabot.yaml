@@ -10,6 +10,9 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
     open-pull-requests-limit: 10
     reviewers:
       - "xh3b4sd"
@@ -20,6 +23,9 @@ updates:
 
   - package-ecosystem: "gomod"
     directory: "/"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
     open-pull-requests-limit: 10
     reviewers:
       - "xh3b4sd"

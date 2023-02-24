@@ -21,7 +21,7 @@ jobs:
         uses: "actions/setup-go@v3"
         with:
           cache: true
-          go-version: "1.19.2"
+          go-version: "1.20.1"
 
       - name: "Check Go Dependencies"
         run: |
@@ -38,6 +38,6 @@ jobs:
 
       - name: "Check Go Linters"
         run: |
-          curl -LOs https://github.com/golangci/golangci-lint/releases/download/v1.50.0/golangci-lint-1.50.0-linux-amd64.tar.gz
-          tar -xzf golangci-lint-1.50.0-linux-amd64.tar.gz
-          ./golangci-lint-1.50.0-linux-amd64/golangci-lint run
+          curl -LOs https://github.com/golangci/golangci-lint/releases/download/v1.51.2/golangci-lint-1.51.2-linux-amd64.tar.gz
+          tar -xzf golangci-lint-1.51.2-linux-amd64.tar.gz
+          ./golangci-lint-1.51.2-linux-amd64/golangci-lint run
