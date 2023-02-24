@@ -1,6 +1,6 @@
 module github.com/xh3b4sd/github-tweeter
 
-go 1.19
+go 1.20
 
 require (
 	github.com/dghubble/oauth1 v0.7.2

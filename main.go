@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/dghubble/oauth1"
 	"github.com/google/go-github/github"
@@ -19,10 +18,6 @@ import (
 	"github.com/xh3b4sd/tracer"
 	"golang.org/x/oauth2"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 const (
 	masterpiece = "intricate artwork masterpiece, ominous, matte painting movie poster, golden ratio, trending on cgsociety, intricate, epic, trending on artstation, by artgerm, h. r. giger and beksinski, highly detailed, vibrant, production cinematic character render, ultra high quality model"
