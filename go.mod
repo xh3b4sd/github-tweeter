@@ -8,7 +8,7 @@ require (
 	github.com/xh3b4sd/go-gpt3 v0.1.0
 	github.com/xh3b4sd/go-twitter v0.1.1
 	github.com/xh3b4sd/logger v0.6.0
-	github.com/xh3b4sd/tracer v0.6.0
+	github.com/xh3b4sd/tracer v0.9.0
 	golang.org/x/oauth2 v0.11.0
 )
 
