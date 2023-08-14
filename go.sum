@@ -28,8 +28,8 @@ github.com/xh3b4sd/go-twitter v0.1.1 h1:YdPV9mKOyVwZlQ5+kxRKI30t2i0YLSdKPQK3asrd
 github.com/xh3b4sd/go-twitter v0.1.1/go.mod h1:v93GMZaGEtMpvywHX7zvmQ3DGXeZa8BCeTatE6aS9vY=
 github.com/xh3b4sd/logger v0.6.0 h1:RUv06v0p2yd1PO/amoDbnvd2BgCtEZZ8NYwb3gjn7eE=
 github.com/xh3b4sd/logger v0.6.0/go.mod h1:HAHJagj3n2JGsk+EubHAc0ZkL7uFn1Jsn0MG3zrqeu4=
-github.com/xh3b4sd/tracer v0.6.0 h1:WMrNsHcWUaCAqMWXogD7IRKC8F6A9Ar4pDF9WcdZsX0=
-github.com/xh3b4sd/tracer v0.6.0/go.mod h1:U5gTjJXdszOlcBmr94v6zDrV8sY6d53thFUkPNZQ4Xk=
+github.com/xh3b4sd/tracer v0.9.0 h1:R3f1b7YilhX6HCuSZJkoNPTpsreNb1SVNYOwAy+476U=
+github.com/xh3b4sd/tracer v0.9.0/go.mod h1:8nRbNXXhSSDmPfyoRRYgwQt/RpzAUH+zNsagP9InH8M=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20190603091049-60506f45cf65/go.mod h1:HSz+uSET+XFnRR8LxR5pz3Of3rY3CfYBVs4xY44aLks=
 golang.org/x/net v0.14.0 h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=
